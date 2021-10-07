@@ -29,6 +29,7 @@ function run() {
 				let chunks = [];
 
 				recoredButton.addEventListener("click", function () {
+					stream.getTracks().forEach((t) => (t.enabled = true));
 					if (mediaRecorder.state === "recording") {
 						mediaRecorder.stop();
 						recoredButton.classList.remove("bg-red-500");
@@ -37,8 +38,9 @@ function run() {
 						return;
 					}
 
+					console.log(stream);
 					mediaRecorder.start();
-					console.log(mediaRecorder.state);
+					console.log("recorder state", mediaRecorder.state);
 					recoredButton.classList.remove("bg-white");
 					recoredButton.classList.add("bg-red-500");
 					recoredButton.classList.add("animate-pulse");
@@ -54,6 +56,7 @@ function run() {
 				};
 
 				mediaRecorder.onstop = function (e) {
+					console.log("recorder state", mediaRecorder.state);
 					console.log(chunks);
 					const blob = new Blob(chunks, { type: "video/mp4" });
 					chunks = [];
@@ -69,6 +72,10 @@ function run() {
 
 					outputElement.classList.add("hidden");
 					recordedVideoElement.src = null;
+				});
+
+				recordedVideoElement.addEventListener("play", function () {
+					stream.getTracks().forEach((t) => (t.enabled = false));
 				});
 			})
 			.catch((e) => {
