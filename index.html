@@ -10,9 +10,21 @@
 </head>
 <body class="antialiased">
 	<div class="container max-w-lg mx-auto">
-		<h1 class="text-3xl font-bold text-center my-4">getusermedia poc</h1>
+		<h1 class="text-3xl font-bold text-center my-4">Video Recording PoC</h1>
 
-		<video id="inputVideo" autoplay muted playsinline></video>
+		<div class="relative w-96 h-96 mx-auto">
+			<video id="inputVideo" autoplay muted playsinline class="absolute top-0 bottom-0 left-0 right-0"></video>
+
+			<button id="record" class="absolute z-10 bottom-8 left-1/2 bg-white px-4 py-2 -ml-8 rounded-full w-16 h-16"></button>
+		</div>
+
+
+		<div id="output" class="relative w-96 h-96 mx-auto my-12 hidden">
+			<div class="flex justify-between items-center mb-2">
+				<h2 class="text-2xl">Recorded video</h2>
+			</div>
+			<video id="recorded-video" controls playsinline loop></video>
+		</div>
 
 		<div id="error-message" class="text-center"></div>
 

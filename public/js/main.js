@@ -2,10 +2,55 @@ function run() {
 	console.log("running");
 	if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
 		navigator.mediaDevices
-			.getUserMedia({ video: {} })
+			.getUserMedia({
+				video: {
+					aspectRatio: {
+						ideal: 1,
+					},
+				},
+				audio: true,
+			})
 			.then((stream) => {
 				const videoElement = document.querySelector("#inputVideo");
 				videoElement.srcObject = stream;
+
+				const mediaRecorder = new MediaRecorder(stream);
+				const recoredButton = document.querySelector("#record");
+				const recordedVideoElement = document.querySelector("#recorded-video");
+				const outputElement = document.querySelector("#output");
+				let chunks = [];
+
+				recoredButton.addEventListener("click", function () {
+					if (mediaRecorder.state === "recording") {
+						mediaRecorder.stop();
+						recoredButton.classList.remove("bg-red-500");
+						recoredButton.classList.remove("animate-pulse");
+						return;
+					}
+
+					mediaRecorder.start();
+					console.log(mediaRecorder.state);
+					recoredButton.classList.add("bg-red-500");
+					recoredButton.classList.add("animate-pulse");
+				});
+
+				mediaRecorder.onstart = function () {
+					outputElement.classList.add("hidden");
+					recordedVideoElement.src = null;
+				};
+
+				mediaRecorder.ondataavailable = function (e) {
+					chunks.push(e.data);
+				};
+
+				mediaRecorder.onstop = function (e) {
+					console.log(chunks);
+					const blob = new Blob(chunks);
+					chunks = [];
+					const videoUrl = window.URL.createObjectURL(blob);
+					recordedVideoElement.src = videoUrl;
+					outputElement.classList.remove("hidden");
+				};
 			})
 			.catch((e) => {
 				console.log(e);
