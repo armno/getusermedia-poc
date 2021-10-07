@@ -1,3 +1,11 @@
+const startButton = document.querySelector("#start-button");
+const stopButton = document.querySelector("#stop-button");
+startButton.addEventListener("click", function () {
+	run();
+	startButton.classList.add("hidden");
+	stopButton.classList.remove("hidden");
+});
+
 function run() {
 	console.log("running");
 	if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
@@ -53,6 +61,15 @@ function run() {
 					recordedVideoElement.src = videoUrl;
 					outputElement.classList.remove("hidden");
 				};
+
+				stopButton.addEventListener("click", function () {
+					startButton.classList.remove("hidden");
+					stopButton.classList.add("hidden");
+					stream.getTracks().forEach((t) => t.stop());
+
+					outputElement.classList.add("hidden");
+					recordedVideoElement.src = null;
+				});
 			})
 			.catch((e) => {
 				console.log(e);
@@ -64,9 +81,3 @@ function run() {
 			"getUserMedia() is not supported";
 	}
 }
-
-const startButton = document.querySelector("#start-button");
-startButton.addEventListener("click", function () {
-	run();
-	startButton.classList.add("hidden");
-});
