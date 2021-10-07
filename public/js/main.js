@@ -65,4 +65,8 @@ function run() {
 	}
 }
 
-run();
+const startButton = document.querySelector("#start-button");
+startButton.addEventListener("click", function () {
+	run();
+	startButton.classList.add("hidden");
+});
