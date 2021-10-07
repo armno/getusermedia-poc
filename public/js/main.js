@@ -47,7 +47,7 @@ function run() {
 
 				mediaRecorder.onstop = function (e) {
 					console.log(chunks);
-					const blob = new Blob(chunks);
+					const blob = new Blob(chunks, { type: "video/mp4" });
 					chunks = [];
 					const videoUrl = window.URL.createObjectURL(blob);
 					recordedVideoElement.src = videoUrl;
