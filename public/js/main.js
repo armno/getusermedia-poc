@@ -25,11 +25,13 @@ function run() {
 						mediaRecorder.stop();
 						recoredButton.classList.remove("bg-red-500");
 						recoredButton.classList.remove("animate-pulse");
+						recoredButton.classList.add("bg-white");
 						return;
 					}
 
 					mediaRecorder.start();
 					console.log(mediaRecorder.state);
+					recoredButton.classList.remove("bg-white");
 					recoredButton.classList.add("bg-red-500");
 					recoredButton.classList.add("animate-pulse");
 				});
