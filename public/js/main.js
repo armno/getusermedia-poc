@@ -15,6 +15,31 @@ enableVideo.addEventListener("change", function (ev) {
 	}
 });
 
+function showMusicFile() {
+	const music = document.querySelector("#music");
+	const audioFile = document.querySelector("#music-file");
+	audioFile.volume = 0.2;
+	music.classList.remove("hidden");
+	music.classList.add("flex");
+}
+
+function hideMusicFile() {
+	const music = document.querySelector("#music");
+	music.classList.remove("flex");
+	music.classList.add("hidden");
+}
+
+function startMusic() {
+	const audioFile = document.querySelector("#music-file");
+	audioFile.currentTime = 0;
+	audioFile.play();
+}
+
+function stopMusic() {
+	const audioFile = document.querySelector("#music-file");
+	audioFile.pause();
+}
+
 function run() {
 	console.log("running");
 	let options;
@@ -36,7 +61,7 @@ function run() {
 			video: false,
 			audio: true,
 		};
-		blobType = { type: "audio/ogg; codecs=opus" };
+		blobType = { type: "audio/mp4" };
 		outputMediaElement = document.querySelector("#recorded-voice");
 	}
 
@@ -54,20 +79,24 @@ function run() {
 				const outputElement = document.querySelector("#output");
 				let chunks = [];
 
+				showMusicFile();
+				startMusic();
+
 				recoredButton.addEventListener("click", function () {
 					stream.getTracks().forEach((t) => (t.enabled = true));
 					if (mediaRecorder.state === "recording") {
 						mediaRecorder.stop();
+						stopMusic();
 						recoredButton.classList.remove("bg-red-500");
 						recoredButton.classList.remove("animate-pulse");
 						recoredButton.classList.add("bg-white");
 						return;
 					}
 
-					console.log(stream);
-					console.log("recorder state", mediaRecorder.state);
+					console.log("recorder state:", mediaRecorder.state);
 
 					mediaRecorder.start();
+					startMusic();
 					recoredButton.classList.remove("bg-white");
 					recoredButton.classList.add("bg-red-500");
 					recoredButton.classList.add("animate-pulse");
@@ -83,8 +112,7 @@ function run() {
 				};
 
 				mediaRecorder.onstop = function (e) {
-					console.log("recorder state", mediaRecorder.state);
-					console.log(chunks);
+					console.log("recorder state:", mediaRecorder.state);
 					const blob = new Blob(chunks, blobType);
 					chunks = [];
 					const mediaURL = window.URL.createObjectURL(blob);
@@ -101,6 +129,7 @@ function run() {
 
 					outputElement.classList.add("hidden");
 					outputMediaElement.src = null;
+					hideMusicFile();
 				});
 
 				outputMediaElement.addEventListener("play", function () {
