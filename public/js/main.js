@@ -80,7 +80,6 @@ function run() {
 				let chunks = [];
 
 				showMusicFile();
-				startMusic();
 
 				recoredButton.addEventListener("click", function () {
 					stream.getTracks().forEach((t) => (t.enabled = true));
