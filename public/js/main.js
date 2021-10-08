@@ -6,41 +6,97 @@ startButton.addEventListener("click", function () {
 	stopButton.classList.remove("hidden");
 });
 
+const enableVideo = document.querySelector("#enable-video");
+enableVideo.addEventListener("change", function (ev) {
+	if (this.checked) {
+		startButton.innerText = "Start camera + microphone";
+	} else {
+		startButton.innerText = "Start microphone";
+	}
+});
+
+function showMusicFile() {
+	const music = document.querySelector("#music");
+	const audioFile = document.querySelector("#music-file");
+	audioFile.volume = 0.2;
+	music.classList.remove("hidden");
+	music.classList.add("flex");
+}
+
+function hideMusicFile() {
+	const music = document.querySelector("#music");
+	music.classList.remove("flex");
+	music.classList.add("hidden");
+}
+
+function startMusic() {
+	const audioFile = document.querySelector("#music-file");
+	audioFile.currentTime = 0;
+	audioFile.play();
+}
+
+function stopMusic() {
+	const audioFile = document.querySelector("#music-file");
+	audioFile.pause();
+}
+
 function run() {
 	console.log("running");
+	let options;
+	let blobType;
+	let outputMediaElement;
+	if (enableVideo.checked) {
+		options = {
+			video: {
+				aspectRatio: {
+					ideal: 1,
+				},
+			},
+			audio: true,
+		};
+		blobType = { type: "video/mp4" };
+		outputMediaElement = document.querySelector("#recorded-video");
+	} else {
+		options = {
+			video: false,
+			audio: true,
+		};
+		blobType = { type: "audio/mp4" };
+		outputMediaElement = document.querySelector("#recorded-voice");
+	}
+
 	if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
 		navigator.mediaDevices
-			.getUserMedia({
-				video: {
-					aspectRatio: {
-						ideal: 1,
-					},
-				},
-				audio: true,
-			})
+			.getUserMedia(options)
 			.then((stream) => {
-				const videoElement = document.querySelector("#inputVideo");
-				videoElement.srcObject = stream;
+				if (enableVideo.checked) {
+					const videoElement = document.querySelector("#inputVideo");
+					videoElement.srcObject = stream;
+				}
 
 				const mediaRecorder = new MediaRecorder(stream);
 				const recoredButton = document.querySelector("#record");
-				const recordedVideoElement = document.querySelector("#recorded-video");
 				const outputElement = document.querySelector("#output");
 				let chunks = [];
+
+				showMusicFile();
+				startMusic();
 
 				recoredButton.addEventListener("click", function () {
 					stream.getTracks().forEach((t) => (t.enabled = true));
 					if (mediaRecorder.state === "recording") {
 						mediaRecorder.stop();
+						stopMusic();
 						recoredButton.classList.remove("bg-red-500");
 						recoredButton.classList.remove("animate-pulse");
 						recoredButton.classList.add("bg-white");
 						return;
 					}
 
-					console.log(stream);
+					console.log("recorder state:", mediaRecorder.state);
+
 					mediaRecorder.start();
-					console.log("recorder state", mediaRecorder.state);
+					startMusic();
 					recoredButton.classList.remove("bg-white");
 					recoredButton.classList.add("bg-red-500");
 					recoredButton.classList.add("animate-pulse");
@@ -48,7 +104,7 @@ function run() {
 
 				mediaRecorder.onstart = function () {
 					outputElement.classList.add("hidden");
-					recordedVideoElement.src = null;
+					outputMediaElement.src = null;
 				};
 
 				mediaRecorder.ondataavailable = function (e) {
@@ -56,13 +112,14 @@ function run() {
 				};
 
 				mediaRecorder.onstop = function (e) {
-					console.log("recorder state", mediaRecorder.state);
-					console.log(chunks);
-					const blob = new Blob(chunks, { type: "video/mp4" });
+					console.log("recorder state:", mediaRecorder.state);
+					const blob = new Blob(chunks, blobType);
 					chunks = [];
-					const videoUrl = window.URL.createObjectURL(blob);
-					recordedVideoElement.src = videoUrl;
+					const mediaURL = window.URL.createObjectURL(blob);
+					outputMediaElement.src = mediaURL;
 					outputElement.classList.remove("hidden");
+
+					outputMediaElement.classList.remove("hidden");
 				};
 
 				stopButton.addEventListener("click", function () {
@@ -71,11 +128,17 @@ function run() {
 					stream.getTracks().forEach((t) => t.stop());
 
 					outputElement.classList.add("hidden");
-					recordedVideoElement.src = null;
+					outputMediaElement.src = null;
+					hideMusicFile();
 				});
 
-				recordedVideoElement.addEventListener("play", function () {
+				outputMediaElement.addEventListener("play", function () {
 					stream.getTracks().forEach((t) => (t.enabled = false));
+					startMusic();
+				});
+
+				outputMediaElement.addEventListener("pause", function () {
+					stopMusic();
 				});
 			})
 			.catch((e) => {
