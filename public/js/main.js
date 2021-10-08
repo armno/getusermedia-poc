@@ -134,6 +134,11 @@ function run() {
 
 				outputMediaElement.addEventListener("play", function () {
 					stream.getTracks().forEach((t) => (t.enabled = false));
+					startMusic();
+				});
+
+				outputMediaElement.addEventListener("pause", function () {
+					stopMusic();
 				});
 			})
 			.catch((e) => {
